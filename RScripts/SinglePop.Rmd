@@ -1,0 +1,71 @@
+---
+title: "Single Population"
+author: "Jonathan J. Borrelli"
+date: "February 24, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Exponential growth
+
+There are a few major ways populations can change over time. New individuals come into the population by birth (_B_) or by immigration (_I_), while decreases in population size come from deaths (_D_) and emigration (_E_). That means that the population size at time _t+1_ is a function of the current population size (_N(t)_) and these processes.   
+
+$$
+N_{t+1} = N_t + B + I - D - E
+$$
+
+and the change from _t_ to _t+1_ is then 
+
+$$
+N_{t+1} - N_t = + B + I - D - E
+$$
+
+Assuming a closed population allows us to remove _I_ and _E_ from this equation, so that the change in population size is a function only of births and deaths. 
+
+$$
+N_{t+1} - N_t = B - D 
+$$
+
+To give an example, imagine a population of 10 individuals, and each time step (e.g., year) there are 3 births and 1 death. We can simulate the dynamics of this imaginary population (seen for 20 timesteps below). Further, since the births are greater than deaths we will expect to see the population growing. 
+
+```{r}
+N.t <- 10
+B <- 3
+D <- 1
+for(i in 1:20){
+  N.t[i +1] <- N.t[i] + B - D
+}
+qplot(y = N.t, x = 1:21, geom = "point", xlab = "Time")
+```
+
+But here you may notice a problem. We hae assumed that B = 3 and D = 1, but that these never change along with the population size. One would expect that as the population grows there would be corresponding increases in births and deaths. Instead of representing the births and deaths as constants, we can instead think of them as per capita rates. For example, perhaps our estimate of 3 births came from observations of the initial population of 10 individuals so the per capita rate would equal 3 births/10 individuals or 0.3. This is essentially what we call fecundity, the average number of births per individual in the population at time _t_, and we will represent it in our equation as _f_. Similarly, rather than expressing the deaths in the population, we can express the fraction of individuals that survive to time _t+1_. Our new equation for predicting population growth becomes:    
+
+$$
+\begin{align}
+N_{t+1} = sN_t + fN_t \\
+ = N(s+f)
+\end{align}
+$$
+
+Note that because we are representing the births and deaths as rates, they now need to be multiplied by the current population size in order to obtain the total number of births and deaths in a given time step. We will make one more simplifying change to our equation, by renaming _s+f_ as a new parameter, _R_ (called the growth rate of the population) so that, 
+
+$$
+N_{t+1} = N_tR
+$$
+What happens when we re-examine our imaginary population in this new framework? Well, if we say that the average number of births per individual is 3, our fecundity is 0.3. For the survival rate, we can say that mortality (fraction of individuals that die, _m_) is 1/10 (0.1). Survival rate is the complement of mortality such that _s_ = 1 - _m_, in this case 0.9. Our new simulation shows a slightly different trajectory for our population. 
+
+```{r}
+N.t <- 10
+f <- 0.3
+s <- 0.9
+R <- s+f
+for(i in 1:20){
+  N.t[i +1] <- N.t[i] * R
+}
+qplot(y = N.t, x = 1:21, geom = "point", xlab = "Time")
+```
+
